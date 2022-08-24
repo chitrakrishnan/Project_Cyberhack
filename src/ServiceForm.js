@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import { CountryDropdown, RegionDropdown } from 'react-country-region-selector';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { useHistory } from "react-router-dom";
-
 
     const ServiceForm = () => {
-
+      const [isSubmit,setSubmit]=useState(false);
+      const [isFormSubmitted,setFormSubmit]=useState(false);
+      
         const [fname,setFname] = useState('');
         const [lname,setLname] = useState('');
         const [orgname,setOrgname] = useState('');
         const [email,setEmail] = useState('');
         const [phone,setPhone] = useState('');
-        const [required,setRequired] = useState('');
+        const [required,setRequired] = useState('Yes');
         const [startDate, setStartDate] = useState(new Date());
         const [completionDate, setCompletionDate] = useState(new Date());
         const [requestDate, setRequestDate] = useState(new Date());
@@ -22,16 +22,32 @@ import { useHistory } from "react-router-dom";
 
     const handleSubmit = (e) => {        
         e.preventDefault();
-        const serviceFormData = { fname,lname, orgname,email,required,phone,startDate,completionDate, requestDate,country,region };
-
-    fetch('http://localhost:3000/ServiceFormResponse/', {
+        const serviceFormData = { fname,lname, orgname,email,required,phone,startDate,completionDate, requestDate,country,region,addlInfo };
+        
+      setSubmit(true);
+    fetch('http://localhost:3001/ServiceFormResponse/', {
       method: 'POST',
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(serviceFormData)
-    }).then(() => {
-      history.push('/');
+    }).then (()=> {
+      console.log("Service Request Successfully received");
+      setSubmit(false);
+      setFname('');
+      setLname('');
+      setOrgname('');
+      setEmail('');
+      setPhone('');
+      setRequired('');
+      setStartDate('');
+      setCompletionDate('');
+      setRequestDate('');
+      setCountry('');
+      setRegion('');
+      setAddlInfo('');
+      setFormSubmit(true);
     })
     }
+
     return (
         <div className="serviceform">
             <h3>Service Request Form</h3>
@@ -63,7 +79,7 @@ import { useHistory } from "react-router-dom";
                   onChange={(e) => setOrgname(e.target.value)}
                   />
                   <label>Registered:</label>
-                <select name ="required" onChange={(e) => setRequired(e.target.value)}>
+                <select name ="required" onChange={(e) => setRequired(e)}>
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
 
@@ -130,8 +146,10 @@ import { useHistory } from "react-router-dom";
                   placeholder="Enter additional information"
                   onChange={(e) => setAddlInfo(e.target.value)}
                   ></textarea>
-                  <button onClick={e => handleSubmit(e)} >Submit</button>
-        
+
+                  {!isSubmit && <button onClick={e => handleSubmit(e)} >Submit</button>}
+                  {isSubmit && <button disabled >Submit in Progress ...</button>}
+                  {isFormSubmitted && <label> Your form has been submitted sucessfully!</label>}
             </form>            
         </div>
       );
